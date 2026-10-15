@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#9ca3af">
+    <title>لوحة لغة الإشارة - طباعة</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.27/dist/interact.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #9ca3af;
+            margin: 0;
+            padding: 20px 0;
+        }
+        
+        .a4-page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto 20mm auto;
+            padding: 10mm;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+            box-sizing: border-box;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 5mm;
+            height: 10mm;
+        }
+
+        .a4-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5mm;
+            flex-grow: 1;
+        }
+
+        .upload-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        .image-container {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            background-color: #f9fafb;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .plus-icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #cbd5e1;
+            transition: color 0.3s;
+        }
+
+        .upload-card:hover .plus-icon-container {
+            color: #6366f1;
+        }
+
+        .image-preview {
+            position: absolute;
+            min-width: 100%;
+            min-height: 100%;
+            max-width: none;
+            max-height: none;
+            cursor: grab;
+            touch-action: none;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            display: none;
+        }
+
+        .image-preview:active {
+            cursor: grabbing;
+        }
+
+        .has-image .plus-icon-container {
+            display: none;
+        }
+
+        .has-image .image-preview {
+            display: block;
+        }
+
+        .remove-btn {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 12px;
+            border: none;
+        }
+
+        .has-image .remove-btn {
+            display: flex;
+        }
+
+        .add-slot-btn, .remove-slot-btn {
+            position: absolute;
+            top: 5px;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 12px;
+            border: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .add-slot-btn:hover, .remove-slot-btn:hover {
+            opacity: 1;
+        }
+
+        .add-slot-btn {
+            left: 5px;
+            background-color: #3b82f6;
+        }
+
+        .remove-slot-btn {
+            left: 35px;
+            background-color: #f97316;
+        }
+
+        .card-footer {
+            height: 12mm;
+            background-color: #fff;
+            border-top: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: 800;
+            color: #1f2937;
+        }
+
+        .editable-footer {
+            cursor: text;
+            transition: background-color 0.2s;
+            outline: none;
+            padding: 0 4px;
+        }
+        
+        .editable-footer:hover, .editable-footer:focus {
+            background-color: #f3f4f6;
+        }
+        
+        .editable-footer:empty:before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .remove-page-btn {
+            position: absolute;
+            top: 10mm;
+            left: 10mm;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 0.5rem;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            border: none;
+            z-index: 30;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .remove-page-btn:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .add-new-page-btn {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background-color: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            border: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .add-new-page-btn:hover {
+            background-color: #059669;
+            transform: scale(1.05);
+        }
+
+        .free-canvas {
+            position: relative;
+            flex-grow: 1;
+            width: 100%;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            background-color: #f8fafc;
+            overflow: hidden;
+        }
+
+        .free-card {
+            position: absolute !important;
+            width: 58mm;
+            height: 78mm;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            z-index: 10;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .free-card.is-moving {
+            box-shadow: 0 12px 25px rgba(79, 70, 229, 0.35);
+            border-color: #4f46e5;
+            z-index: 50 !important;
+        }
+
+        .free-drag-handle {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: #10b981;
+            color: white;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            z-index: 20;
+            font-size: 13px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            touch-action: none;
+        }
+
+        .free-drag-handle:hover {
+            transform: scale(1.1);
+            background-color: #059669;
+        }
+
+        .free-resize-handle {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background-color: #8b5cf6;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: nwse-resize;
+            z-index: 25;
+            font-size: 11px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            touch-action: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .free-resize-handle:hover {
+            transform: scale(1.15);
+            background-color: #7c3aed;
+        }
+
+        .add-free-card-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background-color: #4f46e5;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            border: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .add-free-card-btn:hover {
+            background-color: #4338ca;
+            transform: scale(1.05);
+        }
+
+        .drag-hint {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+
+        .has-image:hover .drag-hint {
+            opacity: 1;
+        }
+
+        .add-flex-arrow-btn {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            z-index: 15;
+            display: none;
+            background-color: #4f46e5;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .has-image .add-flex-arrow-btn {
+            display: flex;
+        }
+
+        .add-flex-arrow-btn:hover {
+            background-color: #4338ca;
+            transform: scale(1.1);
+        }
+
+        .overlay-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            margin-top: -50px;
+            margin-left: -50px;
+            cursor: move;
+            z-index: 20;
+            transform-origin: center center;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .overlay-arrow:hover {
+            outline: 1px dashed rgba(255, 255, 255, 0.6);
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .arrow-graphic {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .arrow-graphic svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.85));
+        }
+
+        .rotation-handle {
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 18px;
+            background-color: #3b82f6;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: grab;
+            z-index: 25;
+            opacity: 0;
+            transition: opacity 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .curve-handle {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #10b981;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 26;
+            opacity: 0;
+            transition: opacity 0.2s;
+            touch-action: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .remove-arrow-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            border: 1.5px solid white;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 27;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .overlay-arrow:hover .rotation-handle,
+        .overlay-arrow:hover .curve-handle,
+        .overlay-arrow:hover .remove-arrow-btn,
+        .rotation-handle.is-dragging,
+        .curve-handle.is-dragging {
+            opacity: 1;
+        }
+
+        .floating-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .action-btn {
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            border: none;
+        }
+
+        .print-btn { background-color: #4f46e5; }
+        .print-btn:hover { transform: scale(1.1); background-color: #4338ca; }
+        .reset-btn { background-color: #6b7280; width: 48px; height: 48px; font-size: 18px; margin-left: 6px; }
+        .reset-btn:hover { transform: scale(1.1); background-color: #dc2626; }
+
+        @page { size: A4; margin: 0; }
+
+        @media print {
+            body { background-color: white; margin: 0; padding: 0; }
+            .a4-page { margin: 0; padding: 10mm; box-shadow: none; width: 210mm; height: 297mm; }
+            .no-print, .floating-buttons, .remove-btn, .drag-hint, .add-flex-arrow-btn, .rotation-handle, .curve-handle, .remove-arrow-btn, .add-slot-btn, .remove-slot-btn, .free-drag-handle, .free-resize-handle, .add-free-card-btn, .add-new-page-btn, .remove-page-btn { display: none !important; }
+            .plus-icon-container { display: none !important; }
+            .overlay-arrow { outline: none !important; background: transparent !important; }
+            .upload-card { border-color: #000; box-shadow: none !important; }
+            .card-footer { border-top-color: #000; }
+            .free-canvas { border: none !important; background-color: transparent !important; }
+            .page-title:empty { display: none !important; }
+        }
+
+        /* ===== اختيار مصدر الصورة (كاميرا / ملف) ===== */
+        .image-container { cursor: default; }
+        .source-picker {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 6px;
+        }
+        .source-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 54px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 2px solid #c7d2fe;
+            background: #fff;
+            color: #4f46e5;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .source-btn i { font-size: 1.5rem; }
+        .source-btn:hover { background: #eef2ff; border-color: #6366f1; transform: translateY(-2px); }
+        .source-btn.camera-btn { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+        .source-btn.camera-btn:hover { background: #4338ca; border-color: #4338ca; }
+
+        /* ===== نافذة الكاميرا ===== */
+        .camera-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+        .camera-modal[hidden] { display: none; }
+        .camera-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 720px;
+        }
+        .camera-stage {
+            width: 100%;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+        #camera-video {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            background: #000;
+        }
+        /* المعاينة غير معكوسة: اليمين يمين والشمال شمال، والصورة الملتقطة مطابقة للمعاينة */
+        #camera-video { transform: none !important; }
+        .camera-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+        }
+        .cam-ctrl {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.18);
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .cam-ctrl:hover { background: rgba(255,255,255,0.32); }
+        .cam-shutter {
+            width: 76px; height: 76px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            background: transparent;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .cam-shutter span {
+            display: block;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.1s;
+        }
+        .cam-shutter:active span { transform: scale(0.85); }
+
+
+        /* ===== تجاوب مع الهواتف والتابلت (للشاشة فقط، الطباعة تفضل A4) ===== */
+        @media screen and (max-width: 820px) {
+            body { padding: 10px 0 90px; }
+            .a4-page {
+                width: calc(100% - 16px);
+                height: auto;
+                min-height: 0;
+                padding: 10px;
+                margin: 0 auto 16px auto;
+            }
+            .page-title { height: auto; min-height: 10mm; font-size: 1.2rem; }
+            .a4-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: none;
+                grid-auto-rows: auto;
+                gap: 10px;
+                flex-grow: 0;
+            }
+            .a4-grid > .upload-card { aspect-ratio: 60 / 84; }
+            .card-footer { height: 11mm; font-size: 1rem; }
+
+            /* الصفحة الحرة: مساحة قابلة للتمرير لأن الخانات بأحجام ثابتة */
+            .free-canvas {
+                min-height: 1100px;
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .free-canvas > .add-free-card-btn,
+            .free-canvas > .add-new-page-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .remove-page-btn { top: 12px; left: 12px; }
+
+            .floating-buttons { bottom: 14px; left: 12px; gap: 10px; }
+            .action-btn { width: 52px; height: 52px; font-size: 20px; }
+            .reset-btn { width: 44px; height: 44px; font-size: 16px; margin-left: 4px; }
+
+            .source-btn { min-width: 48px; padding: 6px 8px; font-size: 0.75rem; }
+            .source-btn i { font-size: 1.3rem; }
+            #camera-video { max-height: 62vh; }
+            .toast { bottom: 80px; }
+        }
+
+        /* شاشات اللمس: ما فيش hover، فنظهر مقابض السهم دايمًا */
+        @media (hover: none) {
+            .rotation-handle, .curve-handle, .remove-arrow-btn { opacity: 1; }
+            .rotation-handle, .curve-handle { width: 22px; height: 22px; }
+            .remove-arrow-btn { width: 24px; height: 24px; }
+        }
+
+        /* ===== رسالة تنبيه صغيرة ===== */
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 120;
+            background: #1f2937;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+        }
+        .toast[hidden] { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="floating-buttons no-print">
+        <button class="action-btn print-btn" onclick="window.print()" title="طباعة الأوراق">
+            <i class="fa-solid fa-print"></i>
+        </button>
+        <button class="action-btn reset-btn" onclick="startOver()" title="مسح كل شيء والبدء من جديد">
+            <i class="fa-solid fa-trash-can"></i>
+        </button>
+    </div>
+
+    <main id="main-content" class="w-full flex flex-col items-center"></main>
+    <input type="file" id="global-file-input" accept="image/*" class="hidden">
+    <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="hidden">
+
+    <div id="camera-modal" class="camera-modal no-print" hidden>
+        <div class="camera-box">
+            <div class="camera-stage">
+                <video id="camera-video" autoplay playsinline muted></video>
+            </div>
+            <div class="camera-controls">
+                <button type="button" id="camera-cancel" class="cam-ctrl" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" id="camera-shutter" class="cam-shutter" title="التقاط الصورة"><span></span></button>
+                <button type="button" id="camera-switch" class="cam-ctrl" title="تبديل الكاميرا (أمامية / خلفية)"><i class="fa-solid fa-camera-rotate"></i></button>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast no-print" hidden></div>
+
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 no-print">
+        <div class="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full mx-4 text-center">
+            <p id="confirm-message" class="text-lg font-bold text-gray-800 mb-6"></p>
+            <div class="flex justify-center gap-4">
+                <button id="confirm-yes" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition">نعم، احذف</button>
+                <button id="confirm-no" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg transition">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultSections = [
+            { title: "الحروف الأبجدية", data: ['أ','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','هـ','و','ي'], prefix: 'alpha' },
+            { title: "الأرقام", data: ['1','2','3','4','5','6','7','8','9','10'], prefix: 'num' },
+            { title: "العشرات", data: ['20','30','40','50','60','70','80','90','100'], prefix: 'ten' },
+            { title: "المئات", data: ['200','300','400','500','600','700','800','900','1000'], prefix: 'hun' },
+            { title: "العائلة", data: ['الأب', 'الأم', 'الأخ', 'الأخت', 'الجد', 'الجدة', 'العم', 'العمة', 'الخال', 'الخالة', 'ابن العم', 'ابن العمة', 'ابن الخال', 'ابن الخالة', 'ابن الأخ', 'ابن الأخت', 'كبير في السن', 'صغير في السن'], prefix: 'fam' },
+            { title: "الألوان", data: ['أحمر', 'أزرق', 'أخضر', 'أصفر', 'أسود', 'أبيض', 'بني', 'برتقالي', 'وردي', 'بنفسجي', 'رمادي'], prefix: 'col' },
+            { title: "أيام الأسبوع", data: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'], prefix: 'day' },
+            { title: "", data: ['اكتب هنا...'], prefix: 'custom', isCustom: true }
+        ];
+
+        let confirmCallback = null;
+        function showConfirm(message, onConfirm) {
+            document.getElementById('confirm-message').innerText = message;
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            confirmCallback = onConfirm;
+        }
+
+        document.getElementById('confirm-yes').onclick = function() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (confirmCallback) confirmCallback();
+        };
+
+        document.getElementById('confirm-no').onclick = function() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            confirmCallback = null;
+        };
+
+        let layoutData = defaultSections.map(sec => ({
+            title: sec.title,
+            prefix: sec.prefix,
+            isCustom: !!sec.isCustom,
+            items: sec.data.map((text, idx) => ({
+                id: sec.isCustom ? `${sec.prefix}-${Date.now()}-${idx}` : `${sec.prefix}-${text}`,
+                text: text,
+                isClone: !!sec.isCustom
+            }))
+        }));
+
+        let currentActiveCardId = null;
+        let savedCardsData = {};
+
+        // ===== الحفظ التلقائي (IndexedDB) =====
+        // بيحفظ: الخانات (التكرار/الصفحات الحرة/أماكنها وأحجامها/النصوص) + الصور + الأسهم + ضبط الصورة
+        const DB_NAME = 'signLanguageBoardDB';
+        const DB_STORE = 'kv';
+        let dbPromise = null;
+        let stateLoaded = false;      // ما نحفظش قبل ما نخلص تحميل الحالة القديمة (علشان ما نمسحهاش بالغلط)
+        let persistTimer = null;
+        let persistRunning = false;
+        let persistAgain = false;
+        let persistWarned = false;
+        let lastWritten = {};         // آخر نسخة اتحفظت لكل خانة (علشان نكتب المتغير بس)
+
+        function openDB() {
+            if (dbPromise) return dbPromise;
+            dbPromise = new Promise((resolve, reject) => {
+                if (!window.indexedDB) { reject(new Error('IndexedDB غير مدعوم')); return; }
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = () => req.result.createObjectStore(DB_STORE);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+            return dbPromise;
+        }
+        function reqToPromise(req) {
+            return new Promise((resolve, reject) => {
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function txDone(tx) {
+            return new Promise((resolve, reject) => {
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+                tx.onabort = () => reject(tx.error || new Error('transaction aborted'));
+            });
+        }
+        function arrowsKey(arrows) { return JSON.stringify(arrows || []); }
+
+        function isValidLayout(layout) {
+            return Array.isArray(layout) && layout.length > 0 && layout.every(sec =>
+                sec && typeof sec.prefix === 'string' && Array.isArray(sec.items) &&
+                sec.items.every(it => it && typeof it.id === 'string' && typeof it.text === 'string'));
+        }
+
+        async function loadSavedState() {
+            let restoredImages = 0;
+            try {
+                const db = await openDB();
+                const tx = db.transaction(DB_STORE, 'readonly');
+                const store = tx.objectStore(DB_STORE);
+                const [layout, keys, values] = await Promise.all([
+                    reqToPromise(store.get('layout')),
+                    reqToPromise(store.getAllKeys()),
+                    reqToPromise(store.getAll())
+                ]);
+                if (isValidLayout(layout)) {
+                    layoutData = layout;
+                    const validIds = new Set();
+                    layoutData.forEach(sec => sec.items.forEach(it => validIds.add(it.id)));
+                    keys.forEach((key, i) => {
+                        if (typeof key !== 'string' || !key.startsWith('card:')) return;
+                        const id = key.slice(5);
+                        const d = values[i];
+                        if (!validIds.has(id) || !d || !d.src) return;
+                        savedCardsData[id] = { src: d.src, x: d.x || 0, y: d.y || 0, arrows: Array.isArray(d.arrows) ? d.arrows : [] };
+                        lastWritten[id] = { src: d.src, x: d.x || 0, y: d.y || 0, arrows: arrowsKey(d.arrows) };
+                        restoredImages++;
+                    });
+                }
+            } catch (err) {
+                console.warn('تعذّر تحميل الحالة المحفوظة:', err);
+            }
+            return restoredImages;
+        }
+
+        function schedulePersist(delay = 100) {
+            if (!stateLoaded) return;
+            clearTimeout(persistTimer);
+            persistTimer = setTimeout(persistNow, delay);
+        }
+
+        async function persistNow() {
+            if (!stateLoaded) return;
+            clearTimeout(persistTimer);
+            persistTimer = null;
+            if (persistRunning) { persistAgain = true; return; }
+            persistRunning = true;
+            try {
+                const db = await openDB();
+                const tx = db.transaction(DB_STORE, 'readwrite');
+                const store = tx.objectStore(DB_STORE);
+                store.put(layoutData, 'layout');
+
+                const snapshot = {};
+                for (const id in savedCardsData) {
+                    const d = savedCardsData[id];
+                    const snap = { src: d.src, x: parseFloat(d.x) || 0, y: parseFloat(d.y) || 0, arrows: arrowsKey(d.arrows) };
+                    snapshot[id] = snap;
+                    const prev = lastWritten[id];
+                    if (!prev || prev.src !== snap.src || prev.x !== snap.x || prev.y !== snap.y || prev.arrows !== snap.arrows) {
+                        store.put({ src: snap.src, x: snap.x, y: snap.y, arrows: d.arrows || [] }, 'card:' + id);
+                    }
+                }
+                for (const id in lastWritten) {
+                    if (!(id in savedCardsData)) store.delete('card:' + id);
+                }
+                await txDone(tx);
+                lastWritten = snapshot;
+            } catch (err) {
+                console.warn('تعذّر الحفظ التلقائي:', err);
+                if (!persistWarned) {
+                    persistWarned = true;
+                    showToast('تعذّر الحفظ التلقائي في هذا المتصفح (قد يكون وضع التصفح الخفي).');
+                }
+            } finally {
+                persistRunning = false;
+                if (persistAgain) { persistAgain = false; schedulePersist(); }
+            }
+        }
+
+        function saveLayout() { schedulePersist(); }
+
+        // حفظ فوري لما المستخدم يقفل الصفحة أو يبدّل التبويب
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') persistNow();
+        });
+        window.addEventListener('pagehide', persistNow);
+
+        // مسح كل شيء والبدء من جديد
+        function startOver() {
+            showConfirm('هل تريد مسح كل الصور والتعديلات والبدء من جديد؟ لا يمكن التراجع عن ذلك.', async function() {
+                stateLoaded = false;
+                clearTimeout(persistTimer);
+                try {
+                    const db = await openDB();
+                    const tx = db.transaction(DB_STORE, 'readwrite');
+                    tx.objectStore(DB_STORE).clear();
+                    await txDone(tx);
+                } catch (e) {}
+                location.reload();
+            });
+        }
+
+        function chunkArray(myArray, chunk_size){
+            let tempArray = [];
+            for (let index = 0; index < myArray.length; index += chunk_size) {
+                tempArray.push(myArray.slice(index, index + chunk_size));
+            }
+            return tempArray;
+        }
+
+        function createCard(item, sectionIndex, itemIndex) {
+            const cardId = item.id;
+            const section = layoutData[sectionIndex];
+            const isCustom = section.isCustom;
+
+            if (isCustom) {
+                const posX = item.x !== undefined ? item.x : 20;
+                const posY = item.y !== undefined ? item.y : 20;
+                const widthStyle = item.w ? `width: ${item.w}px;` : '';
+                const heightStyle = item.h ? `height: ${item.h}px;` : '';
+                return `
+                    <div id="${cardId}" class="upload-card free-card" data-x="${posX}" data-y="${posY}" data-w="${item.w || ''}" data-h="${item.h || ''}" data-sec="${sectionIndex}" data-idx="${itemIndex}" style="transform: translate(${posX}px, ${posY}px); ${widthStyle} ${heightStyle}">
+                        <div class="free-drag-handle no-print" title="اسحب لتحريك الخانة بحرية في أي مكان">
+                            <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                        </div>
+                        <div class="free-resize-handle no-print" title="اسحب لتكبير أو تصغير حجم الخانة">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                        </div>
+                        <button class="remove-slot-btn no-print" style="left: 36px;" onclick="removeSlot(event, ${sectionIndex}, ${itemIndex})" title="حذف الخانة">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        <button class="remove-btn no-print" onclick="removeImage(event, '${cardId}')" title="حذف الصورة">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+
+                        <button class="add-flex-arrow-btn no-print" onclick="addArrow(event, '${cardId}')" title="إضافة سهم مرن (اسحب النقطة الخضراء لثنيه)">
+                            <i class="fa-solid fa-share"></i>
+                        </button>
+
+                        <div class="image-container">
+                            <div class="plus-icon-container no-print">
+                            <div class="source-picker">
+                                <button type="button" class="source-btn camera-btn" onclick="openCamera(event, '${cardId}')" title="التقاط صورة بالكاميرا مباشرة">
+                                    <i class="fa-solid fa-camera"></i><span>كاميرا</span>
+                                </button>
+                                <button type="button" class="source-btn" onclick="triggerFileInput(event, '${cardId}')" title="اختيار صورة من ملفات الجهاز">
+                                    <i class="fa-solid fa-folder-open"></i><span>ملف</span>
+                                </button>
+                            </div>
+                        </div>
+                            <img src="" alt="${item.text}" class="image-preview draggable" id="img-${cardId}" data-x="0" data-y="0">
+                            <div class="drag-hint no-print">اسحب للضبط</div>
+                        </div>
+                        
+                        <div class="card-footer editable-footer" contenteditable="true" data-placeholder="اكتب هنا..." onblur="updateCardText(${sectionIndex}, ${itemIndex}, this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" title="اضغط لتعديل النص">${item.text}</div>
+                    </div>
+                `;
+            }
+
+            let cloneBtn = `<button class="add-slot-btn no-print" onclick="cloneCard(event, ${sectionIndex}, ${itemIndex})" title="تكرار الخانة"><i class="fa-solid fa-copy"></i></button>`;
+            let removeSlotBtn = item.isClone ? `<button class="remove-slot-btn no-print" onclick="removeSlot(event, ${sectionIndex}, ${itemIndex})" title="حذف الخانة"><i class="fa-solid fa-trash"></i></button>` : '';
+
+            return `
+                <div id="${cardId}" class="upload-card">
+                    ${cloneBtn}
+                    ${removeSlotBtn}
+                    <button class="remove-btn no-print" onclick="removeImage(event, '${cardId}')" title="حذف الصورة">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+
+                    <button class="add-flex-arrow-btn no-print" onclick="addArrow(event, '${cardId}')" title="إضافة سهم مرن (اسحب النقطة الخضراء لثنيه)">
+                        <i class="fa-solid fa-share"></i>
+                    </button>
+
+                    <div class="image-container">
+                        <div class="plus-icon-container no-print">
+                            <div class="source-picker">
+                                <button type="button" class="source-btn camera-btn" onclick="openCamera(event, '${cardId}')" title="التقاط صورة بالكاميرا مباشرة">
+                                    <i class="fa-solid fa-camera"></i><span>كاميرا</span>
+                                </button>
+                                <button type="button" class="source-btn" onclick="triggerFileInput(event, '${cardId}')" title="اختيار صورة من ملفات الجهاز">
+                                    <i class="fa-solid fa-folder-open"></i><span>ملف</span>
+                                </button>
+                            </div>
+                        </div>
+                        <img src="" alt="${item.text}" class="image-preview draggable" id="img-${cardId}" data-x="0" data-y="0">
+                        <div class="drag-hint no-print">اسحب للضبط</div>
+                    </div>
+                    
+                    <div class="card-footer">${item.text}</div>
+                </div>
+            `;
+        }
+
+        function updateCardText(sectionIndex, itemIndex, newText) {
+            layoutData[sectionIndex].items[itemIndex].text = newText.trim();
+            saveLayout();
+        }
+
+        function updateSectionTitle(sectionIndex, newTitle) {
+            layoutData[sectionIndex].title = newTitle.trim();
+            saveLayout();
+        }
+
+        function addNewCustomPage(event) {
+            if (event) event.stopPropagation();
+            const newPrefix = `custom-${Date.now()}`;
+            layoutData.push({
+                title: "",
+                prefix: newPrefix,
+                isCustom: true,
+                items: [{
+                    id: `${newPrefix}-card-0`,
+                    text: 'اكتب هنا...',
+                    isClone: true,
+                    x: 15,
+                    y: 15
+                }]
+            });
+            saveLayout();
+            renderPages();
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 100);
+        }
+
+        function removeCustomPage(event, sectionIndex) {
+            if (event) event.stopPropagation();
+            showConfirm('هل أنت متأكد من حذف هذه الصفحة الحرة بالكامل؟', function() {
+                const scrollPos = window.scrollY;
+                const section = layoutData[sectionIndex];
+                section.items.forEach(item => {
+                    if (savedCardsData[item.id]) {
+                        delete savedCardsData[item.id];
+                    }
+                });
+                layoutData.splice(sectionIndex, 1);
+                renderPages();
+                window.scrollTo(0, scrollPos);
+            });
+        }
+
+        function addNewCustomCard(event, sectionIndex) {
+            event.stopPropagation();
+            const section = layoutData[sectionIndex];
+            const count = section.items.length;
+            const offsetX = (count % 3) * 230 + 15;
+            const offsetY = Math.floor((count % 9) / 3) * 310 + 15;
+            const newId = `${section.prefix}-card-${Date.now()}`;
+            section.items.push({
+                id: newId,
+                text: 'اكتب هنا...',
+                isClone: true,
+                x: offsetX,
+                y: offsetY
+            });
+            saveLayout();
+            renderPages();
+        }
+
+        function cloneCard(event, sectionIndex, itemIndex) {
+            event.stopPropagation();
+            const scrollPos = window.scrollY;
+            const section = layoutData[sectionIndex];
+            const originalItem = section.items[itemIndex];
+            const newId = `${originalItem.id}-clone-${Date.now()}`;
+            const newItem = { id: newId, text: originalItem.text, isClone: true };
+            section.items.splice(itemIndex + 1, 0, newItem);
+            saveLayout();
+            renderPages();
+            window.scrollTo(0, scrollPos);
+        }
+
+        function removeSlot(event, sectionIndex, itemIndex) {
+            event.stopPropagation();
+            showConfirm('هل أنت متأكد من حذف هذه الخانة؟', function() {
+                const scrollPos = window.scrollY;
+                const item = layoutData[sectionIndex].items[itemIndex];
+                if(savedCardsData[item.id]) {
+                    delete savedCardsData[item.id];
+                }
+                layoutData[sectionIndex].items.splice(itemIndex, 1);
+                renderPages();
+                window.scrollTo(0, scrollPos);
+            });
+        }
+
+        function renderPages() {
+            const mainContainer = document.getElementById('main-content');
+            mainContainer.innerHTML = '';
+            const customSectionsCount = layoutData.filter(s => s.isCustom).length;
+
+            layoutData.forEach((section, sectionIndex) => {
+                if (section.isCustom) {
+                    let pageDiv = document.createElement('div');
+                    pageDiv.className = 'a4-page';
+                    
+                    if (customSectionsCount > 1) {
+                        let removePageBtn = document.createElement('button');
+                        removePageBtn.className = 'remove-page-btn no-print';
+                        removePageBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> <span>حذف الصفحة</span>';
+                        removePageBtn.title = "حذف هذه الصفحة بالكامل";
+                        removePageBtn.onclick = function(e) { removeCustomPage(e, sectionIndex); };
+                        pageDiv.appendChild(removePageBtn);
+                    }
+
+                    let titleEl = document.createElement('div');
+                    titleEl.className = 'page-title editable-footer';
+                    titleEl.contentEditable = "true";
+                    titleEl.setAttribute('data-placeholder', 'اضغط لكتابة عنوان الصفحة (اختياري)...');
+                    titleEl.title = "اضغط لتعديل عنوان الصفحة";
+                    titleEl.innerText = section.title;
+                    titleEl.onblur = function() { updateSectionTitle(sectionIndex, this.innerText); };
+                    titleEl.onkeydown = function(e) { if(e.key==='Enter'){e.preventDefault(); this.blur();} };
+                    
+                    let canvasDiv = document.createElement('div');
+                    canvasDiv.className = 'free-canvas';
+                    
+                    section.items.forEach((item, idx) => {
+                        if (item.x === undefined || item.y === undefined) {
+                            item.x = (idx % 3) * 230 + 15;
+                            item.y = Math.floor(idx / 3) * 310 + 15;
+                        }
+                        canvasDiv.innerHTML += createCard(item, sectionIndex, idx);
+                    });
+                    
+                    canvasDiv.innerHTML += `
+                        <button class="add-free-card-btn no-print" onclick="addNewCustomCard(event, ${sectionIndex})" title="إضافة خانة حرة جديدة">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>إضافة خانة حرة</span>
+                        </button>
+                        <button class="add-new-page-btn no-print" onclick="addNewCustomPage(event)" title="إضافة صفحة حرة جديدة في الأسفل">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <span>إضافة صفحة حرة جديدة</span>
+                        </button>
+                    `;
+                    
+                    pageDiv.appendChild(titleEl);
+                    pageDiv.appendChild(canvasDiv);
+                    mainContainer.appendChild(pageDiv);
+                    return;
+                }
+
+                const chunks = chunkArray(section.items, 9);
+                chunks.forEach((chunk, chunkIndex) => {
+                    let pageTitleText = chunks.length > 1 ? `${section.title} (${chunkIndex + 1})` : section.title;
+                    let pageDiv = document.createElement('div');
+                    pageDiv.className = 'a4-page';
+                    
+                    let titleEl = document.createElement('div');
+                    titleEl.className = 'page-title';
+                    titleEl.innerText = pageTitleText;
+                    
+                    let gridDiv = document.createElement('div');
+                    gridDiv.className = 'a4-grid';
+                    
+                    chunk.forEach((item) => {
+                        const originalIndex = section.items.indexOf(item);
+                        gridDiv.innerHTML += createCard(item, sectionIndex, originalIndex);
+                    });
+                    
+                    pageDiv.appendChild(titleEl);
+                    pageDiv.appendChild(gridDiv);
+                    mainContainer.appendChild(pageDiv);
+                });
+            });
+            restoreSavedData();
+            schedulePersist();
+        }
+
+        const fileInput = document.getElementById('global-file-input');
+        const cameraFileInput = document.getElementById('camera-file-input');
+
+        // اختيار صورة من ملفات الجهاز
+        function triggerFileInput(event, cardId) {
+            if (event) event.stopPropagation();
+            currentActiveCardId = cardId;
+            fileInput.click();
+        }
+
+        // وضع الصورة داخل الخانة (مشترك بين الملفات والكاميرا)
+        function applyImageToCard(cardId, dataUrl) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+            const imgElement = card.querySelector('.image-preview');
+
+            imgElement.style.transform = `translate(0px, 0px)`;
+            imgElement.setAttribute('data-x', 0);
+            imgElement.setAttribute('data-y', 0);
+
+            imgElement.onload = function() {
+                const container = card.querySelector('.image-container');
+                const imgRatio = this.naturalWidth / this.naturalHeight;
+                const containerRatio = container.offsetWidth / container.offsetHeight;
+                if (imgRatio > containerRatio) {
+                    this.style.height = '100%';
+                    this.style.width = 'auto';
+                } else {
+                    this.style.width = '100%';
+                    this.style.height = 'auto';
+                }
+                saveCardData(cardId, dataUrl, 0, 0);
+            };
+            imgElement.src = dataUrl;
+            card.classList.add('has-image');
+        }
+
+        function handleSelectedFile(e) {
+            const file = e.target.files[0];
+            const cardId = currentActiveCardId;
+            if (file && cardId) {
+                const reader = new FileReader();
+                reader.onload = function(event) { applyImageToCard(cardId, event.target.result); };
+                reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+            currentActiveCardId = null;
+        }
+        fileInput.addEventListener('change', handleSelectedFile);
+        cameraFileInput.addEventListener('change', handleSelectedFile);
+
+        // ===== الكاميرا المباشرة =====
+        const cameraModal = document.getElementById('camera-modal');
+        const cameraVideo = document.getElementById('camera-video');
+        const cameraSwitchBtn = document.getElementById('camera-switch');
+        let cameraStream = null;
+        let cameraFacing = 'environment';
+        let cameraTargetId = null;
+        let toastTimer = null;
+
+        function showToast(message) {
+            const t = document.getElementById('toast');
+            t.textContent = message;
+            t.hidden = false;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.hidden = true; }, 4000);
+        }
+
+        function stopCameraStream() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            cameraVideo.srcObject = null;
+        }
+
+        function closeCamera() {
+            stopCameraStream();
+            cameraModal.hidden = true;
+            cameraTargetId = null;
+        }
+
+        // لو الكاميرا المباشرة مش متاحة: نستخدم كاميرا الموبايل الأصلية (أو نختار ملف)
+        function fallbackToNativeCapture(cardId, message) {
+            closeCamera();
+            if (message) showToast(message);
+            currentActiveCardId = cardId;
+            cameraFileInput.click();
+        }
+
+        async function startCamera() {
+            stopCameraStream();
+            const constraints = {
+                audio: false,
+                video: { facingMode: { ideal: cameraFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+            };
+            cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+            cameraVideo.srcObject = cameraStream;
+            try { await cameraVideo.play(); } catch (e) {}
+
+            // ملحوظة: لا يتم عكس المعاينة ولا الصورة الملتقطة (حتى مع الكاميرا الأمامية)
+            cameraVideo.classList.remove('mirrored');
+
+            // إظهار زر التبديل فقط لو فيه أكتر من كاميرا
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                cameraSwitchBtn.style.display = devices.filter(d => d.kind === 'videoinput').length > 1 ? '' : 'none';
+            } catch (e) {}
+        }
+
+        async function openCamera(event, cardId) {
+            if (event) event.stopPropagation();
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                fallbackToNativeCapture(cardId, 'المتصفح لا يدعم الكاميرا المباشرة، سيتم فتح كاميرا الجهاز.');
+                return;
+            }
+            cameraTargetId = cardId;
+            cameraModal.hidden = false;
+            try {
+                await startCamera();
+            } catch (err) {
+                const denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+                fallbackToNativeCapture(cardId, denied
+                    ? 'لم يتم السماح باستخدام الكاميرا. فعّل الإذن من إعدادات المتصفح.'
+                    : 'تعذّر تشغيل الكاميرا.');
+            }
+        }
+
+        function capturePhoto() {
+            const vw = cameraVideo.videoWidth, vh = cameraVideo.videoHeight;
+            if (!vw || !vh || !cameraTargetId) return;
+            const maxDim = 1600;
+            const scale = Math.min(1, maxDim / Math.max(vw, vh));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(vw * scale);
+            canvas.height = Math.round(vh * scale);
+            canvas.getContext('2d').drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+            const cardId = cameraTargetId;
+            closeCamera();
+            applyImageToCard(cardId, dataUrl);
+        }
+
+        document.getElementById('camera-shutter').addEventListener('click', capturePhoto);
+        document.getElementById('camera-cancel').addEventListener('click', closeCamera);
+        cameraModal.addEventListener('click', function(e) { if (e.target === cameraModal) closeCamera(); });
+        document.addEventListener('keydown', function(e) {
+            if (cameraModal.hidden) return;
+            if (e.key === 'Escape') closeCamera();
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); capturePhoto(); }
+        });
+        cameraSwitchBtn.addEventListener('click', async function() {
+            const previous = cameraFacing;
+            cameraFacing = previous === 'environment' ? 'user' : 'environment';
+            try { await startCamera(); }
+            catch (err) {
+                cameraFacing = previous;
+                try { await startCamera(); } catch (e) { closeCamera(); }
+                showToast('تعذّر تبديل الكاميرا.');
+            }
+        });
+
+        function removeImage(event, cardId) {
+            event.stopPropagation();
+            const card = document.getElementById(cardId);
+            const imgElement = card.querySelector('.image-preview');
+            imgElement.src = '';
+            imgElement.style.transform = `translate(0px, 0px)`;
+            card.classList.remove('has-image');
+            card.querySelectorAll('.overlay-arrow').forEach(arrow => arrow.remove());
+            delete savedCardsData[cardId];
+            schedulePersist();
+        }
+
+        // حساب مسار السهم المرن ورأسه هندسياً
+        function getArrowPaths(cx, cy) {
+            const startX = 50, startY = 85;
+            const endX = 50, endY = 15;
+            
+            const mainPath = `M ${startX} ${startY} Q ${cx} ${cy} ${endX} ${endY}`;
+            
+            // حساب زاوية ميل الرأس بناءً على نقطة التحكم
+            let dx = endX - cx;
+            let dy = endY - cy;
+            if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+                dx = endX - startX;
+                dy = endY - startY;
+            }
+            const angle = Math.atan2(dy, dx);
+            const headLen = 14;
+            const headAngle = Math.PI / 6; // 30 درجة
+            
+            const x1 = endX - headLen * Math.cos(angle - headAngle);
+            const y1 = endY - headLen * Math.sin(angle - headAngle);
+            const x2 = endX - headLen * Math.cos(angle + headAngle);
+            const y2 = endY - headLen * Math.sin(angle + headAngle);
+            
+            const headPath = `M ${x1} ${y1} L ${endX} ${endY} L ${x2} ${y2}`;
+            
+            // نقطة المنتصف على المنحنى لوضع المقبض الأخضر عليها
+            const midX = 0.25 * startX + 0.5 * cx + 0.25 * endX;
+            const midY = 0.25 * startY + 0.5 * cy + 0.25 * endY;
+            
+            return { mainPath, headPath, midX, midY };
+        }
+
+        function addArrow(event, cardId) {
+            event.stopPropagation();
+            const card = document.getElementById(cardId);
+            const arrowId = `arrow-${Date.now()}`;
+            const arrowHtml = createArrowElement(arrowId, 0, 0, 0, 50, 50);
+            card.querySelector('.image-container').insertAdjacentHTML('beforeend', arrowHtml);
+            saveArrowsData(cardId);
+        }
+
+        function createArrowElement(arrowId, x, y, angle, cx = 50, cy = 50) {
+            const { mainPath, headPath, midX, midY } = getArrowPaths(cx, cy);
+
+            return `
+                <div id="${arrowId}" class="overlay-arrow" data-x="${x}" data-y="${y}" data-angle="${angle}" data-cx="${cx}" data-cy="${cy}" style="transform: translate(${x}px, ${y}px) rotate(${angle}rad);">
+                    <div class="arrow-graphic">
+                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path class="arrow-main-path" d="${mainPath}" stroke="white" stroke-width="6" stroke-linecap="round" fill="none"/>
+                            <path class="arrow-head-path" d="${headPath}" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="curve-handle no-print" style="left: ${midX}px; top: ${midY}px;" title="اسحب لثني السهم والتحكم في انحنائه"></div>
+                    <div class="rotation-handle no-print" title="اسحب لتدوير السهم"></div>
+                    <div class="remove-arrow-btn no-print" onclick="removeArrow(event, this)" title="حذف السهم"><i class="fa-solid fa-times"></i></div>
+                </div>
+            `;
+        }
+
+        function removeArrow(event, btnElement) {
+            event.stopPropagation();
+            const arrowElement = btnElement.closest('.overlay-arrow');
+            const cardId = arrowElement.closest('.upload-card').id;
+            arrowElement.remove();
+            saveArrowsData(cardId);
+        }
+
+        function saveArrowsData(cardId) {
+            if (!savedCardsData[cardId]) return;
+            const arrows = Array.from(document.getElementById(cardId).querySelectorAll('.overlay-arrow')).map(el => ({
+                x: parseFloat(el.getAttribute('data-x')) || 0,
+                y: parseFloat(el.getAttribute('data-y')) || 0,
+                angle: parseFloat(el.getAttribute('data-angle')) || 0,
+                cx: parseFloat(el.getAttribute('data-cx')) ?? 50,
+                cy: parseFloat(el.getAttribute('data-cy')) ?? 50
+            }));
+            savedCardsData[cardId].arrows = arrows;
+            schedulePersist();
+        }
+
+        function saveCardData(cardId, imageSrc, x, y) {
+            const existingArrows = savedCardsData[cardId] ? savedCardsData[cardId].arrows : [];
+            savedCardsData[cardId] = { src: imageSrc, x: x, y: y, arrows: existingArrows };
+            schedulePersist(0);
+        }
+
+        function restoreSavedData() {
+            for (const cardId in savedCardsData) {
+                const data = savedCardsData[cardId];
+                const card = document.getElementById(cardId);
+                if (card) {
+                    const imgElement = card.querySelector('.image-preview');
+                    imgElement.src = data.src;
+                    
+                    const x = parseFloat(data.x) || 0, y = parseFloat(data.y) || 0;
+                    imgElement.style.transform = `translate(${x}px, ${y}px)`;
+                    imgElement.setAttribute('data-x', x);
+                    imgElement.setAttribute('data-y', y);
+                    
+                    imgElement.onload = function() {
+                        const container = card.querySelector('.image-container');
+                        if(container) {
+                            const imgRatio = this.naturalWidth / this.naturalHeight;
+                            const containerRatio = container.offsetWidth / container.offsetHeight;
+                            if (imgRatio > containerRatio) { this.style.height = '100%'; this.style.width = 'auto'; } 
+                            else { this.style.width = '100%'; this.style.height = 'auto'; }
+                        }
+                    };
+                    card.classList.add('has-image');
+
+                    if (data.arrows && data.arrows.length > 0) {
+                        const container = card.querySelector('.image-container');
+                        data.arrows.forEach((arrowData, index) => {
+                            const cx = arrowData.cx !== undefined ? arrowData.cx : (arrowData.type === 'curve180' ? 120 : 50);
+                            const cy = arrowData.cy !== undefined ? arrowData.cy : 50;
+                            container.insertAdjacentHTML('beforeend', createArrowElement(`${cardId}-arrow-restored-${index}`, arrowData.x, arrowData.y, arrowData.angle, cx, cy));
+                        });
+                    }
+                }
+            }
+        }
+
+        function initInteractJS() {
+            interact('.free-card').draggable({
+                allowFrom: '.free-drag-handle',
+                inertia: false,
+                modifiers: [
+                    interact.modifiers.restrictRect({
+                        restriction: 'parent',
+                        endOnly: false
+                    })
+                ],
+                listeners: {
+                    start: function(event) {
+                        event.target.classList.add('is-moving');
+                    },
+                    move: function(event) {
+                        var target = event.target;
+                        var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        target.style.transform = `translate(${x}px, ${y}px)`;
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+                    },
+                    end: function(event) {
+                        var target = event.target;
+                        target.classList.remove('is-moving');
+                        var secIdx = parseInt(target.getAttribute('data-sec'));
+                        var itemIdx = parseInt(target.getAttribute('data-idx'));
+                        if (layoutData[secIdx] && layoutData[secIdx].items[itemIdx]) {
+                            layoutData[secIdx].items[itemIdx].x = parseFloat(target.getAttribute('data-x')) || 0;
+                            layoutData[secIdx].items[itemIdx].y = parseFloat(target.getAttribute('data-y')) || 0;
+                            saveLayout();
+                        }
+                    }
+                }
+            });
+
+            interact('.free-card').resizable({
+                edges: { left: false, right: '.free-resize-handle', bottom: '.free-resize-handle', top: false },
+                modifiers: [
+                    interact.modifiers.restrictSize({
+                        min: { width: 110, height: 140 },
+                        max: { width: 700, height: 950 }
+                    })
+                ],
+                listeners: {
+                    start: function(event) {
+                        event.target.classList.add('is-moving');
+                    },
+                    move: function(event) {
+                        var target = event.target;
+                        target.style.width = event.rect.width + 'px';
+                        target.style.height = event.rect.height + 'px';
+                        target.setAttribute('data-w', event.rect.width);
+                        target.setAttribute('data-h', event.rect.height);
+
+                        // إعادة ضبط أبعاد الصورة تلقائياً لتتناسب مع الحجم الجديد للخانة
+                        var img = target.querySelector('.image-preview');
+                        var container = target.querySelector('.image-container');
+                        if (img && img.getAttribute('src') && container) {
+                            var imgRatio = img.naturalWidth / img.naturalHeight;
+                            var containerRatio = container.offsetWidth / container.offsetHeight;
+                            if (imgRatio > containerRatio) {
+                                img.style.height = '100%';
+                                img.style.width = 'auto';
+                            } else {
+                                img.style.width = '100%';
+                                img.style.height = 'auto';
+                            }
+                        }
+                    },
+                    end: function(event) {
+                        var target = event.target;
+                        target.classList.remove('is-moving');
+                        var secIdx = parseInt(target.getAttribute('data-sec'));
+                        var itemIdx = parseInt(target.getAttribute('data-idx'));
+                        if (layoutData[secIdx] && layoutData[secIdx].items[itemIdx]) {
+                            layoutData[secIdx].items[itemIdx].w = parseFloat(target.getAttribute('data-w'));
+                            layoutData[secIdx].items[itemIdx].h = parseFloat(target.getAttribute('data-h'));
+                            saveLayout();
+                        }
+                    }
+                }
+            });
+
+            // تحريك الصورة
+            interact('.draggable').draggable({
+                inertia: true,
+                modifiers: [interact.modifiers.restrictRect({ restriction: 'parent', endOnly: false })],
+                autoScroll: true,
+                listeners: {
+                    move: function(event) {
+                        var target = event.target;
+                        var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        target.style.transform = `translate(${x}px, ${y}px)`;
+                        target.setAttribute('data-x', x); target.setAttribute('data-y', y);
+                        
+                        const cardId = target.closest('.upload-card').id;
+                        if(savedCardsData[cardId]) {
+                            savedCardsData[cardId].x = x; savedCardsData[cardId].y = y;
+                            schedulePersist();
+                        }
+                    }
+                }
+            });
+
+            // تحريك السهم بالكامل
+            interact('.overlay-arrow').draggable({
+                inertia: true,
+                ignoreFrom: '.rotation-handle, .curve-handle, .remove-arrow-btn',
+                modifiers: [interact.modifiers.restrictRect({ restriction: 'parent', endOnly: false })],
+                listeners: {
+                    move: function (event) {
+                        var target = event.target;
+                        var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                        var angle = parseFloat(target.getAttribute('data-angle')) || 0;
+                        target.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`;
+                        target.setAttribute('data-x', x); target.setAttribute('data-y', y);
+                    },
+                    end: function(event) { saveArrowsData(event.target.closest('.upload-card').id); }
+                }
+            });
+
+            // تدوير السهم (المقبض الأزرق)
+            interact('.rotation-handle').draggable({
+                onstart: function(event) {
+                    var arrow = event.target.parentElement;
+                    var rect = arrow.getBoundingClientRect();
+                    arrow.setAttribute('data-center-x', rect.left + rect.width / 2);
+                    arrow.setAttribute('data-center-y', rect.top + rect.height / 2);
+                    event.target.classList.add('is-dragging');
+                },
+                onmove: function(event) {
+                    var arrow = event.target.parentElement;
+                    var angle = Math.atan2(event.clientY - (parseFloat(arrow.getAttribute('data-center-y')) || 0), event.clientX - (parseFloat(arrow.getAttribute('data-center-x')) || 0)) - (Math.PI / 2);
+                    var x = parseFloat(arrow.getAttribute('data-x')) || 0, y = parseFloat(arrow.getAttribute('data-y')) || 0;
+                    arrow.style.transform = `translate(${x}px, ${y}px) rotate(${angle}rad)`;
+                    arrow.setAttribute('data-angle', angle);
+                },
+                onend: function(event) {
+                    event.target.classList.remove('is-dragging');
+                    saveArrowsData(event.target.closest('.upload-card').id);
+                }
+            });
+
+            // التحكم في انحناء السهم (المقبض الأخضر)
+            interact('.curve-handle').draggable({
+                onstart: function(event) {
+                    event.target.classList.add('is-dragging');
+                },
+                onmove: function(event) {
+                    var handle = event.target;
+                    var arrow = handle.parentElement;
+                    var angle = parseFloat(arrow.getAttribute('data-angle')) || 0;
+                    
+                    // تحويل حركة الماوس لتتناسب مع زاوية دوران السهم الحالية
+                    var localDx = event.dx * Math.cos(-angle) - event.dy * Math.sin(-angle);
+                    var localDy = event.dx * Math.sin(-angle) + event.dy * Math.cos(-angle);
+                    
+                    // نضرب في 2 لأن نقطة المنتصف تتحرك بنصف مقدار نقطة التحكم (Bezier math)
+                    var cx = (parseFloat(arrow.getAttribute('data-cx')) ?? 50) + localDx * 2;
+                    var cy = (parseFloat(arrow.getAttribute('data-cy')) ?? 50) + localDy * 2;
+                    
+                    // حدود لعدم تشوه السهم بشكل مبالغ
+                    cx = Math.max(-60, Math.min(160, cx));
+                    cy = Math.max(-20, Math.min(120, cy));
+                    
+                    arrow.setAttribute('data-cx', cx);
+                    arrow.setAttribute('data-cy', cy);
+                    
+                    var paths = getArrowPaths(cx, cy);
+                    arrow.querySelector('.arrow-main-path').setAttribute('d', paths.mainPath);
+                    arrow.querySelector('.arrow-head-path').setAttribute('d', paths.headPath);
+                    
+                    handle.style.left = paths.midX + 'px';
+                    handle.style.top = paths.midY + 'px';
+                },
+                onend: function(event) {
+                    event.target.classList.remove('is-dragging');
+                    saveArrowsData(event.target.closest('.upload-card').id);
+                }
+            });
+        }
+
+        window.onload = async function() {
+            const restored = await loadSavedState();
+            stateLoaded = true;
+            renderPages();
+            initInteractJS();
+            if (restored > 0) showToast('تم استرجاع عملك السابق ✓');
+            try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+        };
+    </script>
+</body>
+</html>
