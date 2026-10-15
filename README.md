@@ -11,21 +11,6 @@
 
 ---
 
-## 🚀 التشغيل المحلي (Local Run)
-لا يحتاج الموقع إلى خادم (Server) أو تثبيت أي حزم برمجية:
-* افتح ملف `index.html` في أي متصفح حديث مباشرة (Google Chrome, Edge, Safari, Firefox).
-* لتعديل الكود البرمجي، افتح المجلد باستخدام برنامج **Visual Studio Code**.
-
----
-
-## 🌐 النشر على GitHub Pages
-1. ارفع محتويات الفولدر ده على **Repository** جديد على حسابك في GitHub.
-2. ادخل على **Settings → Pages**.
-3. في قسم **Build and deployment** وتحت **Source** اختار **Deploy from a branch**، وبعدين اختار Branch: `main` والفولدر `/ (root)` واضغط **Save**.
-4. استنى دقيقة وهيظهر رابط الموقع جاهز للمشاركة:
-   `https://USERNAME.github.io/REPO-NAME/`
-
-> **ملاحظة:** الموقع بيحتاج اتصال بالإنترنت علشان يحمّل مكتبات التنسيق والخطوط والـ Icons والـ Drag & Drop (`Tailwind CSS`, `Google Fonts - Tajawal`, `Font Awesome`, `interact.js`) من الـ CDN.
 
 ---
 
